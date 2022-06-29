@@ -1,0 +1,2616 @@
+openapi: 3.0.0
+paths:
+  /promo/campaigns:
+    post:
+      operationId: CampaignsController_createCampaign
+      summary: Create a new promo campaign
+      description: This API is typically only called from Needle
+      parameters:
+        - name: x-shopback-agent
+          in: header
+          description: sbneedle for needle calls
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          description: auth token for internal needle user
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCampaignDto"
+      responses:
+        "201":
+          description: ""
+        "400":
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 400
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: BAD_REQUEST
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: claimFrom must be a Date in the future
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+        "401":
+          description: Invalid API key or authorization header
+        "403":
+          description: Authenticated user or backend service is not allowed to access this
+            resource
+  "/promo/campaigns/{id}/details":
+    post:
+      operationId: CampaignsController_getCampaign
+      summary: Get information about a single campaign
+      parameters:
+        - name: id
+          required: true
+          in: path
+          example: 626bd969d3e750d2f31bdeab
+          schema:
+            type: string
+        - name: x-shopback-agent
+          in: header
+          description: sbandroidagent/sbiosagent for calls from mobile, or sbconsumeragent
+            for calls from web or sbneedle for needle calls
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          description: auth token for customer or internal needle user
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetCampaignRequest"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetCampaignResponse"
+        "400":
+          description: Invalid campaignId provided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 400
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: BAD_REQUEST
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: BAD_REQUEST
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+        "401":
+          description: Invalid API key or authorization header
+        "403":
+          description: Authenticated user or backend service is not allowed to access this
+            resource
+        "404":
+          description: Campaign with provided ID not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 404
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: NOT_FOUND
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: NOT_FOUND
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+  /promo/campaigns/search:
+    get:
+      operationId: CampaignsController_searchCampaigns
+      summary: Search for Campaign
+      description: This API is typically only called from Needle
+      parameters:
+        - name: limit
+          required: true
+          in: query
+          description: Number of campaigns in one page
+          schema:
+            minimum: 1
+            maximum: 100
+            type: integer
+        - name: doCount
+          required: false
+          in: query
+          description: Option to fetch Count
+          schema:
+            type: boolean
+        - name: lastId
+          required: false
+          in: query
+          description: Last Id of the last page to fetch next items
+          schema:
+            type: string
+        - name: x-shopback-agent
+          in: header
+          description: sbneedle for needle calls
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          description: auth token for internal needle user
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of Campaigns
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CampaignSearchResponse"
+        "401":
+          description: Invalid API key or authorization header
+        "403":
+          description: Authenticated user or backend service is not allowed to access this
+            resource
+  "/promo/campaigns/{id}":
+    put:
+      operationId: CampaignsController_updateCampaign
+      summary: Update Campaign
+      description: This API is typically only called from Needle to update a campaign
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: x-shopback-agent
+          in: header
+          description: sbneedle for needle calls
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          description: auth token for internal needle user
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampaignUpdateRequest"
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 400
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: BAD_REQUEST
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: Cannot decrease claim/redemption values
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+        "401":
+          description: Invalid API key or authorization header
+        "403":
+          description: Authenticated user or backend service is not allowed to access this
+            resource
+  /promo/claims/suggested:
+    post:
+      operationId: ClaimsController_getSuggested
+      summary: Get best promo for a given purchase
+      parameters:
+        - name: x-api-key
+          in: header
+          description: API key belonging to the backend service. Used only if
+            authenticating as a internal backend service
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetSuggestedClaimRequest"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetSuggestedClaimResponse"
+        "401":
+          description: Invalid API key or authorization header
+        "403":
+          description: Authenticated user or backend service is not allowed to access this
+            resource
+  /promo/claims/search:
+    post:
+      operationId: ClaimsController_search
+      summary: Search for claims
+      parameters:
+        - name: x-shopback-agent
+          in: header
+          description: sbandroidagent/sbiosagent for calls from mobile, or sbconsumeragent
+            for calls from web
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          description: auth token for customer
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchRequest"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+        "400":
+          description: Malformed request body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 400
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: BAD_REQUEST
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: BAD_REQUEST
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+        "401":
+          description: Invalid API key or authorization header
+        "403":
+          description: Authenticated user or backend service is not allowed to access this
+            resource
+  /promo/claims:
+    post:
+      operationId: ClaimsController_claim
+      summary: Claim by campaignId or promo code
+      parameters:
+        - name: x-shopback-agent
+          in: header
+          description: sbandroidagent/sbiosagent for calls from mobile, or sbconsumeragent
+            for calls from web
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          description: auth token for customer
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClaimRequest"
+            examples:
+              promoCode:
+                summary: Claim via promo code
+                value:
+                  claimType: promoCode
+                  promoCode: 5OFF50
+              campaignId:
+                summary: Claim via campaign ID
+                value:
+                  claimType: campaignId
+                  campaignId: 6285bc713a84eb31d086fbc0
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClaimResponse"
+        "401":
+          description: Invalid API key or authorization header
+        "403":
+          description: Authenticated user or backend service is not allowed to access this
+            resource
+        "404":
+          description: Promo not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 404
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: NOT_FOUND
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: NOT_FOUND
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+        "422":
+          description: Claim limit Reached or invalid promo code
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 422
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        enum:
+                          - PROMO_CLAIM_LIMIT_REACHED
+                          - PROMO_INVALID_PROMO_CODE
+                          - PROMO_CLAIM_PERIOD_ENDED
+                          - PROMO_CLAIM_PERIOD_NOT_STARTED
+                          - PROMO_CAMPAIGN_ALREADY_CLAIMED
+                          - PROMO_USER_ELIGIBILITY_FAILED
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: This Promo is fully claimed
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+  /promo/redemptions:
+    post:
+      operationId: RedemptionsController_performRedemption
+      summary: Perform a redemption of a claimed promo
+      description: >-
+        To be called by backend services and not directly by customers.
+              This API is idempotent and can be safely retried in the event of timeouts or other unexpected errors
+      parameters:
+        - name: x-api-key
+          in: header
+          description: API key belonging to the backend service. Used only if
+            authenticating as a internal backend service
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RedemptionRequestBody"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedemptionResponse"
+        "401":
+          description: Invalid API key or authorization header
+        "403":
+          description: Authenticated user or backend service is not allowed to access this
+            resource
+        "404":
+          description: Claim with provided claimId does not exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 404
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: NOT_FOUND
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: NOT_FOUND
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+        "409":
+          description: Another promo was already applied for this order
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 409
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: CONFLICT
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: CONFLICT
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+        "422":
+          description: Eligibility checks failed, promo limit reached, promo period has
+            not started, or promo period has ended
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 422
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        enum:
+                          - PROMO_NO_REDEMPTIONS_REMANING_FOR_CLAIM
+                          - PROMO_REDEMPTION_LIMIT_REACHED
+                          - PROMO_REDEMPTION_PERIOD_ENDED
+                          - PROMO_REDEMPTION_PERIOD_NOT_STARTED
+                          - PROMO_NOT_VISIBLE
+                          - PROMO_USER_ELIGIBILITY_FAILED
+                          - PROMO_BUSINESS_UNIT_ELIGIBILITY_FAILED
+                          - PROMO_MERCHANT_ELIGIBILITY_FAILED
+                          - PROMO_MIN_SPEND_NOT_REACHED
+                          - PROMO_PAYMENT_METHOD_NOT_ELIGIBLE
+                        example: PROMO_REDEMPTION_LIMIT_REACHED
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: Promo redemption limit has been reached
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+    put:
+      operationId: RedemptionsController_updateRedemptionStatus
+      summary: Update redemption status
+      description: To be called by backend services upon confirmation or failure of
+        purchase, or upon refund
+      parameters:
+        - name: x-api-key
+          in: header
+          description: API key belonging to the backend service. Used only if
+            authenticating as a internal backend service
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RedemptionStatusUpdateRequest"
+      responses:
+        "204":
+          description: ""
+        "401":
+          description: Invalid API key or authorization header
+        "403":
+          description: Authenticated user or backend service is not allowed to access this
+            resource
+        "404":
+          description: Redemption with provided reference not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 404
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: NOT_FOUND
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: NOT_FOUND
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+        "409":
+          description: This is returned when an attempt is made to set the status to
+            redeemed, but the status was previously already set back to
+            available
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 409
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: CONFLICT
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: Redemption was already previously set to available, and cannot be set
+                          to redeemed or refunded
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+        "422":
+          description: Status transition for redemption is invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 422
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: UNPROCESSABLE_ENTITY
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: Redemption cannot be transitioned to redeemed
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+  /promo/redemptions/recalculate:
+    post:
+      operationId: RedemptionsController_recalculateDiscount
+      summary: Recalculate discount amount for redemption in case of partial refund
+      description: To be called by backend services upon partial refund
+      parameters:
+        - name: x-api-key
+          in: header
+          description: API key belonging to the backend service. Used only if
+            authenticating as a internal backend service
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecalculateDiscountRequest"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecalculateDiscountResponse"
+        "401":
+          description: Invalid API key or authorization header
+        "403":
+          description: Authenticated user or backend service is not allowed to access this
+            resource
+        "404":
+          description: Redemption with provided reference not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 404
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: REDEMPTION_NOT_FOUND
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: REDEMPTION_NOT_FOUND
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+        "422":
+          description: Redemption is not in redeemed status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    required:
+                      - statusCode
+                      - code
+                      - title
+                      - message
+                    properties:
+                      statusCode:
+                        type: number
+                        enum:
+                          - 422
+                        description: HTTP status code of this error response
+                      code:
+                        type: string
+                        description: Identifier for the type of error that has occurred
+                        example: UNPROCESSABLE_ENTITY
+                      title:
+                        type: string
+                        description: Customer-friendly error title. Note that this can be an empty
+                          string
+                        example: An error occurred
+                      message:
+                        type: string
+                        description: Customer-friendly error message
+                        example: Redemption is not in redeemed status
+                      reqId:
+                        type: string
+                        description: Unique identifier for this request. Only used for debugging
+                          purposes
+                        example: fc8c394d-c422-4fc7-ab15-727d91b97338
+info:
+  title: promo-platform
+  description: promo-platform-service
+  version: "0.1"
+  contact: {}
+tags: []
+servers:
+  - url: http://localhost:9000
+    description: local development
+    variables: null
+  - url: http://localhost:8080
+    description: local k8 port-forward
+    variables: null
+  - url: http://gateway.dev.shopback.com
+    description: dev gateway
+    variables: null
+components:
+  securitySchemes:
+    auth:
+      type: apiKey
+      in: header
+      name: Authorization
+  schemas:
+    CampaignMechanicDto:
+      type: object
+      properties:
+        type:
+          enum:
+            - absolute-discount
+            - percentage-discount
+          type: string
+          example: percentage-discount
+        discountValue:
+          example: 50
+          description: The discount value for this promo.
+          oneOf:
+            - type: integer
+              description: For absolute-discount, the value is the discount in minor units
+                (i.e. $1 discount would have a value of 100.
+            - type: number
+              format: float
+              description: For percentage-discount, it is the percentage off (i.e. 20.7% off
+                would have a value of 20.7.
+        maxDiscountValue:
+          type: integer
+          example: 50
+          description: >-
+            The maximum discount value for this promo in minor units (i.e.
+            maximum discount of $5 would have a value of 500).
+                  Only applicable (and required) if the mechanic type is percentage-discount
+      required:
+        - type
+        - discountValue
+    ImageUrlsDto:
+      type: object
+      properties:
+        banner:
+          type: string
+          description: URL to banner image that will be shown to users.
+          example: http://images.com/banner.jpg
+        logo:
+          type: string
+          description: URL to logo image that will be shown to users.
+          example: http://images.com/logo.jpg
+      required:
+        - banner
+        - logo
+    DisplayProgressBarsDto:
+      type: object
+      properties:
+        claim:
+          type: boolean
+        redemption:
+          type: boolean
+      required:
+        - claim
+        - redemption
+    LimitDto:
+      type: object
+      properties:
+        amount:
+          type: integer
+          nullable: true
+          minimum: 1
+          maximum: 10000
+      required:
+        - amount
+    SingleUserLimitDto:
+      type: object
+      properties:
+        amount:
+          type: integer
+          minimum: 1
+          maximum: 50
+      required:
+        - amount
+    BillingInfoDto:
+      type: object
+      properties:
+        cofundPercent:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 10
+          description: Percentage of this promo that is co-funded by the merchant. If the
+            promo is fully funded by ShopBack, then this should be 0.
+          format: float
+      required:
+        - cofundPercent
+    DisbursementDto:
+      type: object
+      properties:
+        method:
+          enum:
+            - claim-by-promo-code
+            - system
+            - direct-claim
+          type: string
+          description: The way that users are able to claim promos for this campaign.
+            Currently, we only support one disbursement method for a given
+            campaign.
+      required:
+        - method
+    UserRestrictionsDto:
+      type: object
+      properties:
+        segmentKey:
+          enum:
+            - sb-paylater:is-new-customer
+            - sb-paylater:dormant-customer-60-days
+            - sb-paylater:is-new-customer-to-merchant
+            - sb-paylater:inactive-to-merchant-90-days
+          type: string
+          description: Key for the user segment that the user must belong to in order to
+            use this promo. Only applicable if the restriction type is
+            user-segment.
+        segmentParams:
+          type: object
+          description: Parameters for the user segment that the user must belong to in
+            order to use this promo. Only applicable if the chosen segment
+            requires parameters.
+        type:
+          type: string
+          enum:
+            - user-segment
+      required:
+        - type
+    ItemRestrictionsDto:
+      type: object
+      properties:
+        type:
+          enum:
+            - merchants
+          type: string
+        merchantType:
+          enum:
+            - sboc-eoutlet
+            - sbgo-outlet
+            - sbgo-brand
+            - sbpaylater-merchant
+          type: string
+          description: The item's merchant type must match this merchantType before the
+            promo can be applied. Applicable only if restriction type is
+            merchants.
+        merchantIds:
+          example:
+            - "0000275"
+            - "0000245"
+          description: The item's merchant id must be included within these merchantIds
+            before the promo can be applied. Applicable only if restriction type
+            is merchants.
+          type: array
+          items:
+            type: string
+      required:
+        - type
+    AggregatedItemsRestrictionDto:
+      type: object
+      properties:
+        minAmount:
+          type: integer
+          minimum: 1
+          example: 400
+          description: Minimum spend amount in the purchase before the promo can be
+            applied, which is expressed in minor units. Applicable only if
+            restriction type is min-spend or min-spend-excluding-cashback.
+        paymentMethodTypes:
+          type: string
+          enum:
+            - card
+            - grabpay
+          example:
+            - card
+          description: Payment method types that must be used in the purchase before the
+            promo can be applied. Applicable only if restriction type is
+            payment-method.
+        binRange:
+          example:
+            - "552523"
+            - "552534"
+          description: The payment card bin used in the purchase must start with one of
+            the BINs within this range before the promo can be applied.
+            Applicable only if restriction type is card-bin-range.
+          type: array
+          items:
+            type: string
+            maxLength: 8
+            minLength: 6
+        type:
+          type: string
+          enum:
+            - min-spend
+            - min-spend-excluding-cashback
+            - payment-method
+            - card-bin-range
+      required:
+        - type
+    RestrictionDto:
+      type: object
+      properties:
+        user:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserRestrictionsDto"
+        item:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemRestrictionsDto"
+        aggregatedItems:
+          example:
+            - type: min-spend
+              minAmount: 400
+            - type: payment-method
+              paymentMethodTypes:
+                - card
+            - type: card-bin-range
+              binRange:
+                - "552523"
+                - "552534"
+          type: array
+          items:
+            $ref: "#/components/schemas/AggregatedItemsRestrictionDto"
+      required:
+        - user
+        - item
+        - aggregatedItems
+    CreateCampaignDto:
+      type: object
+      properties:
+        mechanic:
+          $ref: "#/components/schemas/CampaignMechanicDto"
+        name:
+          type: string
+          maxLength: 100
+          description: Name of the campaign. This will be shown to users.
+          example: $5 Off Min Spend $50
+        campaignCode:
+          type: string
+          maxLength: 150
+          description: Identifier which is used internally to search for the campaign.
+            This will not be shown to users.
+          example: 5OFF50_2022_May
+        salesforceId:
+          type: string
+          description: Salesforce ID used to track revenue for partnerships. Can be
+            omitted if not applicable.
+          example: a012x00000KXtr8AAD
+        details:
+          type: string
+          maxLength: 500
+          description: Details of campaign which will be shown to users.
+          example: Get $5 off your next purchase
+        termsAndConditions:
+          type: string
+          description: Terms and conditions for this campaign which will be shown to users.
+          example: <ul><li>This promo is for New Users only.</li><li>Applicable only for
+            first 1000 redemptions only.</li></ul>
+        merchantName:
+          type: string
+          maxLength: 50
+          description: Name of merchant where this promo can be applied. Will be shown to
+            users.
+          example: Uniqlo
+        partnershipName:
+          type: string
+          description: Name of partnership for this promo. Will be shown to users. Can be
+            omitted if there is no partnership.
+          example: DBS Bank
+        imageUrls:
+          $ref: "#/components/schemas/ImageUrlsDto"
+        redirectLink:
+          type: string
+          description: Link where users will be redirected to when they want to apply the
+            promo. Cannot be a branch.io link.
+          example: shopback://ecommerce/shoppingcart
+        displayProgressBars:
+          description: Booleans indicating whether the progress bar for claims or
+            redemptions should be shown on the UI.
+          allOf:
+            - $ref: "#/components/schemas/DisplayProgressBarsDto"
+        isVisible:
+          type: boolean
+          description: Boolean indicating whether users should be able to see this promo,
+            regardless of whether they have claimed it.
+        claimLimit:
+          example:
+            &a1
+            amount: 100
+          description: Maximum number of claims that can be made for this campaign. If
+            null, unlimited claims can be made. If not null, the max limit is
+            10000.
+          allOf:
+            - $ref: "#/components/schemas/LimitDto"
+        redemptionLimit:
+          example:
+            &a2
+            amount: 100
+          description: Maximum number of redemptions that can be made for this campaign.
+            If null, unlimited redemptions can be made. If not null, the max
+            limit is 10000.
+          allOf:
+            - $ref: "#/components/schemas/LimitDto"
+        singleUserRedemptionLimit:
+          example:
+            &a3
+            amount: 10
+          description: Maximum number of redemptions that can be made by a single user for
+            this campaign. Maximum allowed limit is 50.
+          allOf:
+            - $ref: "#/components/schemas/SingleUserLimitDto"
+        billing:
+          $ref: "#/components/schemas/BillingInfoDto"
+        disbursement:
+          type: array
+          items:
+            $ref: "#/components/schemas/DisbursementDto"
+        promoCode:
+          type: string
+          maxLength: 20
+          description: >-
+            Promo code that is keyed in by users to claim the promo. Not to be
+            confused with campaign code which is used to identify campaigns
+            internally.
+                  Required if campaign disbursement method is claim-by-promo-code.
+          example: 5OFF50
+        restrictions:
+          $ref: "#/components/schemas/RestrictionDto"
+        createdBy:
+          type: string
+          example: test@shopback.com
+        businessUnits:
+          type: array
+          items:
+            type: string
+            enum:
+              - sboc-vouchers
+              - sbgo-vouchers
+              - sbpay
+              - sbpaylater
+        claimFrom:
+          format: date-time
+          type: string
+        claimBy:
+          format: date-time
+          type: string
+        redeemFrom:
+          format: date-time
+          type: string
+        redeemBy:
+          format: date-time
+          type: string
+      required:
+        - mechanic
+        - name
+        - campaignCode
+        - termsAndConditions
+        - merchantName
+        - imageUrls
+        - redirectLink
+        - displayProgressBars
+        - isVisible
+        - claimLimit
+        - redemptionLimit
+        - singleUserRedemptionLimit
+        - billing
+        - disbursement
+        - restrictions
+        - createdBy
+        - businessUnits
+        - claimFrom
+        - claimBy
+        - redeemFrom
+        - redeemBy
+    EligibilityInputUser:
+      type: object
+      properties:
+        shouldCheck:
+          type: boolean
+          default: true
+          description: Whether to determine claim eligibility by user input.
+    PaymentMethod:
+      type: object
+      properties:
+        type:
+          enum:
+            - card
+            - molpay
+            - paymaya
+            - gcash
+            - grabpay
+          type: string
+          example: card
+        bin:
+          type: string
+          minLength: 6
+          maxLength: 8
+          example: "453252"
+          description: BIN (Bank Identification Number) of the card being used for this
+            purchase. Only required if payment method type is card.
+      required:
+        - type
+    EligibilityInputPayment:
+      type: object
+      properties:
+        cashbackOffset:
+          type: integer
+          minimum: 0
+        paymentMethod:
+          $ref: "#/components/schemas/PaymentMethod"
+      required:
+        - cashbackOffset
+        - paymentMethod
+    Merchant:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "0000123"
+        type:
+          type: string
+          enum:
+            - sboc-eoutlet
+            - sbgo-outlet
+            - sbgo-brand
+            - sbpaylater-merchant
+      required:
+        - id
+        - type
+    ItemOptional:
+      type: object
+      properties:
+        id:
+          type: string
+          example: item-one
+          description: Identifier for this particular item in the purchase.
+        amount:
+          type: integer
+          example: 1000
+          description: Amount that user is paying for this item which is expressed in
+            minor units (i.e. $1 should be sent as 100).
+        merchant:
+          $ref: "#/components/schemas/Merchant"
+        businessUnit:
+          type: string
+          enum:
+            - sboc-vouchers
+            - sbgo-vouchers
+            - sbpay
+            - sbpaylater
+    EligibiltyInput:
+      type: object
+      properties:
+        user:
+          default:
+            shouldCheck: true
+          allOf:
+            - $ref: "#/components/schemas/EligibilityInputUser"
+        payment:
+          description: If specified, this endpoint determines claim eligibility by payment
+            input.
+          allOf:
+            - $ref: "#/components/schemas/EligibilityInputPayment"
+        defaultIfInputMissing:
+          type: boolean
+          default: true
+          description: Default eligibility returned in the event of missing inputs
+            required by any restriction checker.
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemOptional"
+    CampaignEligibility:
+      type: object
+      properties:
+        input:
+          default:
+            user:
+              shouldCheck: true
+            defaultIfInputMissing: true
+          allOf:
+            - $ref: "#/components/schemas/EligibiltyInput"
+    GetCampaignRequest:
+      type: object
+      properties:
+        eligibility:
+          default:
+            input:
+              user:
+                shouldCheck: true
+              defaultIfInputMissing: true
+          allOf:
+            - $ref: "#/components/schemas/CampaignEligibility"
+        transformerVersion:
+          type: integer
+          minimum: 0
+          maximum: 0
+          description: If specified, this endpoint transforms the response according to
+            the specified transformer version; else no transformation is
+            performed.
+    ApproximateStatistics:
+      type: object
+      properties:
+        claims:
+          type: integer
+          description: Total number of claims made for this campaign.
+        claimPercent:
+          type: number
+          format: float
+          description: Percentage of claims made for this campaign over claimLimit.amount.
+        redemptions:
+          type: integer
+          description: Total number of redemptions made for this campaign.
+        redemptionPercent:
+          type: number
+          format: float
+          description: Percentage of redemptions made for this campaign over
+            redemptionLimit.amount.
+      required:
+        - claims
+        - claimPercent
+        - redemptions
+        - redemptionPercent
+    CampaignGetDto:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 626bd3a7d3e750d2f31bd9cc
+        mechanic:
+          $ref: "#/components/schemas/CampaignMechanicDto"
+        name:
+          type: string
+          maxLength: 100
+          description: Name of the campaign. This will be shown to users.
+          example: $5 Off Min Spend $50
+        campaignCode:
+          type: string
+          maxLength: 150
+          description: Identifier which is used internally to search for the campaign.
+            This will not be shown to users.
+          example: 5OFF50_2022_May
+        salesforceId:
+          type: string
+          description: Salesforce ID used to track revenue for partnerships. Can be
+            omitted if not applicable.
+          example: a012x00000KXtr8AAD
+        details:
+          type: string
+          maxLength: 500
+          description: Details of campaign which will be shown to users.
+          example: Get $5 off your next purchase
+        termsAndConditions:
+          type: string
+          description: Terms and conditions for this campaign which will be shown to users.
+          example: <ul><li>This promo is for New Users only.</li><li>Applicable only for
+            first 1000 redemptions only.</li></ul>
+        merchantName:
+          type: string
+          maxLength: 50
+          description: Name of merchant where this promo can be applied. Will be shown to
+            users.
+          example: Uniqlo
+        partnershipName:
+          type: string
+          description: Name of partnership for this promo. Will be shown to users. Can be
+            omitted if there is no partnership.
+          example: DBS Bank
+        imageUrls:
+          $ref: "#/components/schemas/ImageUrlsDto"
+        redirectLink:
+          type: string
+          description: Link where users will be redirected to when they want to apply the
+            promo. Cannot be a branch.io link.
+          example: shopback://ecommerce/shoppingcart
+        displayProgressBars:
+          description: Booleans indicating whether the progress bar for claims or
+            redemptions should be shown on the UI.
+          allOf:
+            - $ref: "#/components/schemas/DisplayProgressBarsDto"
+        isVisible:
+          type: boolean
+          description: Boolean indicating whether users should be able to see this promo,
+            regardless of whether they have claimed it.
+        claimLimit:
+          example: *a1
+          description: Maximum number of claims that can be made for this campaign. If
+            null, unlimited claims can be made. If not null, the max limit is
+            10000.
+          allOf:
+            - $ref: "#/components/schemas/LimitDto"
+        redemptionLimit:
+          example: *a2
+          description: Maximum number of redemptions that can be made for this campaign.
+            If null, unlimited redemptions can be made. If not null, the max
+            limit is 10000.
+          allOf:
+            - $ref: "#/components/schemas/LimitDto"
+        singleUserRedemptionLimit:
+          example: *a3
+          description: Maximum number of redemptions that can be made by a single user for
+            this campaign. Maximum allowed limit is 50.
+          allOf:
+            - $ref: "#/components/schemas/SingleUserLimitDto"
+        billing:
+          $ref: "#/components/schemas/BillingInfoDto"
+        disbursement:
+          type: array
+          items:
+            $ref: "#/components/schemas/DisbursementDto"
+        promoCode:
+          type: string
+          maxLength: 20
+          description: >-
+            Promo code that is keyed in by users to claim the promo. Not to be
+            confused with campaign code which is used to identify campaigns
+            internally.
+                  Required if campaign disbursement method is claim-by-promo-code.
+          example: 5OFF50
+        restrictions:
+          $ref: "#/components/schemas/RestrictionDto"
+        createdBy:
+          type: string
+          example: test@shopback.com
+        isEligible:
+          type: boolean
+        businessUnits:
+          type: array
+          items:
+            type: string
+            enum:
+              - sboc-vouchers
+              - sbgo-vouchers
+              - sbpay
+              - sbpaylater
+        claimFrom:
+          format: date-time
+          type: string
+        claimBy:
+          format: date-time
+          type: string
+        redeemFrom:
+          format: date-time
+          type: string
+        redeemBy:
+          format: date-time
+          type: string
+        approximateStatistics:
+          $ref: "#/components/schemas/ApproximateStatistics"
+      required:
+        - _id
+        - mechanic
+        - name
+        - campaignCode
+        - termsAndConditions
+        - merchantName
+        - imageUrls
+        - redirectLink
+        - displayProgressBars
+        - isVisible
+        - claimLimit
+        - redemptionLimit
+        - singleUserRedemptionLimit
+        - billing
+        - disbursement
+        - restrictions
+        - createdBy
+        - isEligible
+        - businessUnits
+        - claimFrom
+        - claimBy
+        - redeemFrom
+        - redeemBy
+        - approximateStatistics
+    ClaimWithoutCampaign:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 626bd3a7d3e750d2f31bd9cc
+        campaignId:
+          type: string
+          example: 626bd3a7d3e750d2f31bd9cc
+        redemptionsRemaining:
+          type: integer
+          description: Remaining number of redemptions that can be made for this claim.
+            Maximum allowed limit is 50.
+        refundCount:
+          type: integer
+          description: Number of redemption refunds made for this claim.
+        accountId:
+          type: integer
+        redemptionAttempts:
+          type: array
+          items:
+            type: string
+        promoCode:
+          type: string
+        claimedAt:
+          format: date-time
+          type: string
+      required:
+        - _id
+        - campaignId
+        - redemptionsRemaining
+        - refundCount
+        - redemptionAttempts
+    RedeemedAtCountDto:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of redemptions made for this claim on this date. Maximum
+            allowed limit is 50.
+          minimum: 1
+          maximum: 50
+        date:
+          format: date-time
+          type: string
+      required:
+        - count
+        - date
+    Display:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 20% Off Purchases
+        subtitleOne:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            type: string
+            example: New Users Only
+        subtitleTwo:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            type: string
+            example: Bank of Thailand
+        redeemedAtCounts:
+          type: array
+          minItems: 0
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/RedeemedAtCountDto"
+      required:
+        - title
+        - subtitleOne
+        - subtitleTwo
+        - redeemedAtCounts
+    CampaignTransformedV0Dto:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 626bd3a7d3e750d2f31bd9cc
+        name:
+          type: string
+          description: Name of the campaign. This will be shown to users.
+          example: $5 Off Min Spend $50
+        termsAndConditions:
+          type: string
+          description: Terms and conditions for this campaign which will be shown to users.
+          example: <ul><li>This promo is for New Users only.</li><li>Applicable only for
+            first 1000 redemptions only.</li></ul>
+        mechanic:
+          $ref: "#/components/schemas/CampaignMechanicDto"
+        merchantName:
+          type: string
+          description: Name of merchant where this promo can be applied. Will be shown to
+            users.
+          example: Uniqlo
+        redirectLink:
+          type: string
+          description: Link where users will be redirected to when they want to apply the
+            promo. Cannot be a branch.io link.
+          example: shopback://ecommerce/shoppingcart
+        displayProgressBars:
+          description: Booleans indicating if the progress bars for claim or redemption
+            should be shown
+          allOf:
+            - $ref: "#/components/schemas/DisplayProgressBarsDto"
+        partnershipName:
+          type: string
+          description: Name of partnership for this promo. Will be shown to users. Can be
+            omitted if there is no partnership.
+          example: DBS Bank
+        details:
+          type: string
+          description: Details of campaigns which will be shown to users.
+          example: Get $5 off your next purchase
+        claim:
+          $ref: "#/components/schemas/ClaimWithoutCampaign"
+        display:
+          $ref: "#/components/schemas/Display"
+        imageUrls:
+          $ref: "#/components/schemas/ImageUrlsDto"
+        redeemFrom:
+          format: date-time
+          type: string
+        redeemBy:
+          format: date-time
+          type: string
+        approximateStatistics:
+          $ref: "#/components/schemas/ApproximateStatistics"
+        isEligible:
+          type: boolean
+      required:
+        - _id
+        - name
+        - termsAndConditions
+        - mechanic
+        - merchantName
+        - redirectLink
+        - displayProgressBars
+        - display
+        - imageUrls
+        - redeemFrom
+        - redeemBy
+        - approximateStatistics
+        - isEligible
+    GetCampaignResponseData:
+      type: object
+      properties:
+        campaign:
+          oneOf:
+            - $ref: "#/components/schemas/CampaignTransformedV0Dto"
+            - $ref: "#/components/schemas/CampaignGetDto"
+      required:
+        - campaign
+    GetCampaignResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/GetCampaignResponseData"
+      required:
+        - data
+    CampaignDto:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 626bd3a7d3e750d2f31bd9cc
+        mechanic:
+          $ref: "#/components/schemas/CampaignMechanicDto"
+        name:
+          type: string
+          maxLength: 100
+          description: Name of the campaign. This will be shown to users.
+          example: $5 Off Min Spend $50
+        campaignCode:
+          type: string
+          maxLength: 150
+          description: Identifier which is used internally to search for the campaign.
+            This will not be shown to users.
+          example: 5OFF50_2022_May
+        salesforceId:
+          type: string
+          description: Salesforce ID used to track revenue for partnerships. Can be
+            omitted if not applicable.
+          example: a012x00000KXtr8AAD
+        details:
+          type: string
+          maxLength: 500
+          description: Details of campaign which will be shown to users.
+          example: Get $5 off your next purchase
+        termsAndConditions:
+          type: string
+          description: Terms and conditions for this campaign which will be shown to users.
+          example: <ul><li>This promo is for New Users only.</li><li>Applicable only for
+            first 1000 redemptions only.</li></ul>
+        merchantName:
+          type: string
+          maxLength: 50
+          description: Name of merchant where this promo can be applied. Will be shown to
+            users.
+          example: Uniqlo
+        partnershipName:
+          type: string
+          description: Name of partnership for this promo. Will be shown to users. Can be
+            omitted if there is no partnership.
+          example: DBS Bank
+        imageUrls:
+          $ref: "#/components/schemas/ImageUrlsDto"
+        redirectLink:
+          type: string
+          description: Link where users will be redirected to when they want to apply the
+            promo. Cannot be a branch.io link.
+          example: shopback://ecommerce/shoppingcart
+        displayProgressBars:
+          description: Booleans indicating whether the progress bar for claims or
+            redemptions should be shown on the UI.
+          allOf:
+            - $ref: "#/components/schemas/DisplayProgressBarsDto"
+        isVisible:
+          type: boolean
+          description: Boolean indicating whether users should be able to see this promo,
+            regardless of whether they have claimed it.
+        claimLimit:
+          example: *a1
+          description: Maximum number of claims that can be made for this campaign. If
+            null, unlimited claims can be made. If not null, the max limit is
+            10000.
+          allOf:
+            - $ref: "#/components/schemas/LimitDto"
+        redemptionLimit:
+          example: *a2
+          description: Maximum number of redemptions that can be made for this campaign.
+            If null, unlimited redemptions can be made. If not null, the max
+            limit is 10000.
+          allOf:
+            - $ref: "#/components/schemas/LimitDto"
+        singleUserRedemptionLimit:
+          example: *a3
+          description: Maximum number of redemptions that can be made by a single user for
+            this campaign. Maximum allowed limit is 50.
+          allOf:
+            - $ref: "#/components/schemas/SingleUserLimitDto"
+        billing:
+          $ref: "#/components/schemas/BillingInfoDto"
+        disbursement:
+          type: array
+          items:
+            $ref: "#/components/schemas/DisbursementDto"
+        promoCode:
+          type: string
+          maxLength: 20
+          description: >-
+            Promo code that is keyed in by users to claim the promo. Not to be
+            confused with campaign code which is used to identify campaigns
+            internally.
+                  Required if campaign disbursement method is claim-by-promo-code.
+          example: 5OFF50
+        restrictions:
+          $ref: "#/components/schemas/RestrictionDto"
+        createdBy:
+          type: string
+          example: test@shopback.com
+        businessUnits:
+          type: array
+          items:
+            type: string
+            enum:
+              - sboc-vouchers
+              - sbgo-vouchers
+              - sbpay
+              - sbpaylater
+        claimFrom:
+          format: date-time
+          type: string
+        claimBy:
+          format: date-time
+          type: string
+        redeemFrom:
+          format: date-time
+          type: string
+        redeemBy:
+          format: date-time
+          type: string
+        approximateStatistics:
+          $ref: "#/components/schemas/ApproximateStatistics"
+      required:
+        - _id
+        - mechanic
+        - name
+        - campaignCode
+        - termsAndConditions
+        - merchantName
+        - imageUrls
+        - redirectLink
+        - displayProgressBars
+        - isVisible
+        - claimLimit
+        - redemptionLimit
+        - singleUserRedemptionLimit
+        - billing
+        - disbursement
+        - restrictions
+        - createdBy
+        - businessUnits
+        - claimFrom
+        - claimBy
+        - redeemFrom
+        - redeemBy
+        - approximateStatistics
+    CampaignSearchResponseData:
+      type: object
+      properties:
+        count:
+          type: Integer
+          description: Total number of campaigns
+        campaigns:
+          type: array
+          items:
+            $ref: "#/components/schemas/CampaignDto"
+      required:
+        - campaigns
+    CampaignSearchResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/CampaignSearchResponseData"
+      required:
+        - data
+    CampaignUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the campaign. This will be shown to users.
+          example: $5 Off Min Spend $50
+        termsAndConditions:
+          type: string
+          description: Terms and conditions for this campaign which will be shown to users.
+          example: <ul><li>This promo is for New Users only.</li><li>Applicable only for
+            first 1000 redemptions only.</li></ul>
+        merchantName:
+          type: string
+          description: Name of merchant where this promo can be applied. Will be shown to
+            users.
+          example: Uniqlo
+        redirectLink:
+          type: string
+          description: Link where users will be redirected to when they want to apply the
+            promo. Cannot be a branch.io link.
+          example: shopback://ecommerce/shoppingcart
+        displayProgressBars:
+          description: Booleans indicating if the progress bars for claim or redemption
+            should be shown
+          allOf:
+            - $ref: "#/components/schemas/DisplayProgressBarsDto"
+        details:
+          type: string
+          description: Details of campaigns which will be shown to users.
+          example: Get $5 off your next purchase
+        redemptionLimit:
+          example:
+            amount: 100
+          description: Maximum number of redemptions that can be made for this campaign.
+            If null, unlimited redemptions can be made. If not null, the max
+            limit is 10000.
+          allOf:
+            - $ref: "#/components/schemas/LimitDto"
+        claimLimit:
+          example:
+            amount: 100
+          description: Maximum number of claims that can be made for this campaign. If
+            null, unlimited claims can be made. If not null, the max limit is
+            10000.
+          allOf:
+            - $ref: "#/components/schemas/LimitDto"
+        salesforceId:
+          type: string
+          description: Salesforce ID used to track revenue for partnerships. Can be
+            omitted if not applicable.
+          example: a012x00000KXtr8AAD
+        isVisible:
+          type: boolean
+          description: Boolean indicating whether users should be able to see this promo,
+            regardless of whether they have claimed it.
+        updatedBy:
+          type: string
+          description: Email of change maker
+        imageUrls:
+          $ref: "#/components/schemas/ImageUrlsDto"
+      required:
+        - updatedBy
+    ItemInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          example: item-one
+          description: Identifier for this particular item in the purchase. Used to match
+            the item to the discountedItems property in the response.
+        amount:
+          type: integer
+          example: 1000
+          description: Amount that user is paying for this item which is expressed in
+            minor units (i.e. $1 should be sent as 100).
+        merchant:
+          $ref: "#/components/schemas/Merchant"
+        businessUnit:
+          type: string
+          enum:
+            - sboc-vouchers
+            - sbgo-vouchers
+            - sbpay
+            - sbpaylater
+      required:
+        - id
+        - amount
+        - merchant
+        - businessUnit
+    GetSuggestedClaimRequest:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          example: 5647354
+        cashbackOffset:
+          type: integer
+          minimum: 0
+          description: The amount of cashback that is used for this purchase in minor
+            units (i.e. $1 should be sent as 100).
+        paymentMethod:
+          description: Information about the non-cashback payment method being used for
+            this purchase. Can be null or excluded if the purchase is made
+            purely via cashback.
+          allOf:
+            - $ref: "#/components/schemas/PaymentMethod"
+        items:
+          description: Information about the items being purchased by the user.
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemInfo"
+      required:
+        - accountId
+        - cashbackOffset
+        - paymentMethod
+        - items
+    CampaignForSugggestedClaim:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the promo campaign for this claim. To be used for display
+            purposes.
+          example: $5 Off Your First Purchase
+      required:
+        - name
+    SuggestedClaim:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: ID of the suggested claim.
+          example: 626bd3a7d3e750d2f31bd9cc
+        campaign:
+          $ref: "#/components/schemas/CampaignForSugggestedClaim"
+      required:
+        - _id
+        - campaign
+    DiscountedItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: item-one
+          description: Identifier for this particular item in the purchase. Will be equal
+            to the item id that was sent in the request.
+        amount:
+          type: integer
+          example: 500
+          description: Discounted amount that the user should pay for this item after the
+            promo is applied, in minor units (i.e. $1 will be sent as 100).
+      required:
+        - id
+        - amount
+    GetSuggestedClaimResponseData:
+      type: object
+      properties:
+        claim:
+          nullable: true
+          description: Best claim to be used for this purchase. Will be null if user has
+            no eligible claims.
+          allOf:
+            - $ref: "#/components/schemas/SuggestedClaim"
+        discountedItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiscountedItem"
+      required:
+        - claim
+        - discountedItems
+    GetSuggestedClaimResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/GetSuggestedClaimResponseData"
+      required:
+        - data
+    RedeemFromRange:
+      type: object
+      properties:
+        gt:
+          format: date-time
+          type: string
+          description: Filter on date that campaign.redeemFrom is greater than
+        lt:
+          format: date-time
+          type: string
+          description: Filter on date that campaign.redeemFrom is less than
+    RedeemByRange:
+      type: object
+      properties:
+        gt:
+          format: date-time
+          type: string
+          description: Filter on date that campaign.redeemBy is greater than
+        lt:
+          format: date-time
+          type: string
+          description: Filter on date that campaign.redeemBy is less than
+    RedemptionPercentRange:
+      type: object
+      properties:
+        gt:
+          type: number
+          minimum: 0
+          description: Filter on percentage that
+            campaign.approximateStatistics.redemptionPercent is greater than
+          format: float
+        lt:
+          type: number
+          maximum: 100
+          description: Filter on percentage that
+            campaign.approximateStatistics.redemptionPercent is less than
+          format: float
+    CampaignFilters:
+      type: object
+      properties:
+        businessUnits:
+          type: array
+          items:
+            type: string
+            enum:
+              - sboc-vouchers
+              - sbgo-vouchers
+              - sbpay
+              - sbpaylater
+          description: Filter on campaign.businessUnits
+        isVisible:
+          type: boolean
+          default: true
+          description: Filter on campaign.isVisible
+        redeemFrom:
+          $ref: "#/components/schemas/RedeemFromRange"
+        redeemBy:
+          $ref: "#/components/schemas/RedeemByRange"
+        redemptionPercent:
+          $ref: "#/components/schemas/RedemptionPercentRange"
+    RedemptionsRemainingRange:
+      type: object
+      properties:
+        gt:
+          type: integer
+          description: Filter on number that redemptionsRemaining is greater than
+        lt:
+          type: integer
+          description: Filter on number that redemptionsRemaining is less than
+    Filters:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          description: Filter on accountId
+          example: 123456
+        campaignIds:
+          type: string
+          description: Filter on campaignIds
+          example: 626bd969d3e750d2f31bdeab
+        campaign:
+          default:
+            isVisible: true
+          allOf:
+            - $ref: "#/components/schemas/CampaignFilters"
+        redemptionsRemaining:
+          $ref: "#/components/schemas/RedemptionsRemainingRange"
+    ClaimEligibility:
+      type: object
+      properties:
+        input:
+          default:
+            user:
+              shouldCheck: true
+            defaultIfInputMissing: true
+          allOf:
+            - $ref: "#/components/schemas/EligibiltyInput"
+        failedRestrictionCategories:
+          type: array
+          items:
+            type: string
+            enum:
+              - user
+              - item
+              - aggregatedItems
+          description: If specified, this endpoint returns those claims ineligible for any
+            of the specified campaign restriction categories; else it returns
+            the eligible claims.
+    Next:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Last claim id in previous paginated response
+          example: 626bd969d3e750d2f31bdeab
+        date:
+          format: date-time
+          type: string
+          description: One of claimedAt, redeemFrom, redeemBy of last claim in previous
+            paginated response, depending on sort.by
+      required:
+        - id
+    Sort:
+      type: object
+      properties:
+        by:
+          type: string
+          enum:
+            - claimedAt
+            - redeemFrom
+            - redeemBy
+        order:
+          type: string
+          enum:
+            - asc
+            - desc
+      required:
+        - by
+        - order
+    SearchRequest:
+      type: object
+      properties:
+        filters:
+          default:
+            campaign:
+              isVisible: true
+          allOf:
+            - $ref: "#/components/schemas/Filters"
+        eligibility:
+          default:
+            input:
+              user:
+                shouldCheck: true
+              defaultIfInputMissing: true
+          allOf:
+            - $ref: "#/components/schemas/ClaimEligibility"
+        limit:
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 25
+          description: Limit of number of claims to be returned.
+        transformerVersion:
+          type: integer
+          minimum: 0
+          maximum: 0
+          description: If specified, this endpoint transforms the response according to
+            the specified transformer version; else no transformation is
+            performed.
+        next:
+          $ref: "#/components/schemas/Next"
+        sort:
+          $ref: "#/components/schemas/Sort"
+    CampaignNested:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 626bd3a7d3e750d2f31bd9cc
+        termsAndConditions:
+          type: string
+          description: Terms and conditions for this campaign which will be shown to users.
+          example: <ul><li>This promo is for New Users only.</li><li>Applicable only for
+            first 1000 redemptions only.</li></ul>
+        mechanic:
+          $ref: "#/components/schemas/CampaignMechanicDto"
+        merchantName:
+          type: string
+          description: Name of merchant where this promo can be applied. Will be shown to
+            users.
+          example: Uniqlo
+        redirectLink:
+          type: string
+          description: Link where users will be redirected to when they want to apply the
+            promo. Cannot be a branch.io link.
+          example: shopback://ecommerce/shoppingcart
+        displayProgressBars:
+          description: Booleans indicating whether the progress bar for claims or
+            redemptions should be shown on the UI.
+          allOf:
+            - $ref: "#/components/schemas/DisplayProgressBarsDto"
+        partnershipName:
+          type: string
+          description: Name of partnership for this promo. Will be shown to users. Can be
+            omitted if there is no partnership.
+          example: DBS Bank
+        details:
+          type: string
+          description: Details of campaign which will be shown to users.
+          example: Get $5 off your next purchase
+        name:
+          type: string
+        imageUrls:
+          $ref: "#/components/schemas/ImageUrlsDto"
+        redeemFrom:
+          format: date-time
+          type: string
+        redeemBy:
+          format: date-time
+          type: string
+        approximateStatistics:
+          $ref: "#/components/schemas/ApproximateStatistics"
+      required:
+        - _id
+        - termsAndConditions
+        - mechanic
+        - merchantName
+        - redirectLink
+        - displayProgressBars
+        - name
+        - imageUrls
+        - redeemFrom
+        - redeemBy
+        - approximateStatistics
+    ClaimTransformedV0Dto:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 626bd3a7d3e750d2f31bd9cc
+        campaignId:
+          type: string
+          example: 626bd3a7d3e750d2f31bd9cc
+        redemptionsRemaining:
+          type: integer
+          description: Remaining number of redemptions that can be made for this claim.
+            Maximum allowed limit is 50.
+        refundCount:
+          type: integer
+          description: Number of redemption refunds made for this claim.
+        accountId:
+          type: integer
+        redemptionAttempts:
+          type: array
+          items:
+            type: string
+        promoCode:
+          type: string
+        claimedAt:
+          format: date-time
+          type: string
+        campaign:
+          $ref: "#/components/schemas/CampaignNested"
+        display:
+          $ref: "#/components/schemas/Display"
+      required:
+        - _id
+        - campaignId
+        - redemptionsRemaining
+        - refundCount
+        - redemptionAttempts
+        - campaign
+        - display
+    SearchResponseData:
+      type: object
+      properties:
+        claims:
+          oneOf:
+            - type: array
+              items:
+                $ref: "#/components/schemas/ClaimTransformedV0Dto"
+            - type: array
+              items:
+                $ref: "#/components/schemas/ClaimWithoutCampaign"
+        next:
+          $ref: "#/components/schemas/Next"
+      required:
+        - claims
+    SearchResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/SearchResponseData"
+      required:
+        - data
+    ClaimRequest:
+      type: object
+      properties:
+        claimType:
+          enum:
+            - campaignId
+            - promoCode
+          type: string
+          description: Claim type.
+        campaignId:
+          type: string
+          description: Id of the campaign to be claimed by the user. Required if claim
+            type is campaignId.
+        promoCode:
+          type: string
+          maxLength: 20
+          description: Promocode entered by user. Required if claim type is promoCode.
+      required:
+        - claimType
+    ClaimResponseData:
+      type: object
+      properties:
+        campaignName:
+          type: string
+          example: Get $5 Off Your First PayLater Purchase
+        claim:
+          $ref: "#/components/schemas/ClaimWithoutCampaign"
+      required:
+        - campaignName
+        - claim
+    ClaimResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/ClaimResponseData"
+      required:
+        - data
+    RedemptionRequestBody:
+      type: object
+      properties:
+        claimId:
+          type: string
+          example: 6278eb560ab3436d3dc6d8bd
+          description: ID of claim being redeemed
+        commit:
+          type: boolean
+          description: >-
+            Whether or not to actually perform the redemption process. If false,
+            eligibility and discounts are computed and returned, but the
+            redemption is not performed.
+                  This behavior for commit: false can be used for display of the discounted amount or for validating eligibility before the purchase is made
+        accountId:
+          type: integer
+          description: accountId of user making the claim
+          example: 4352694
+        reference:
+          type: string
+          example: RBM28I-U02-4
+          description: Reference which uniquely identifies the user's purchase. Required
+            if commit is true
+        cashbackOffset:
+          type: integer
+          minimum: 0
+          description: The amount of cashback that is used for this purchase in minor
+            units (i.e. $1 should be sent as 100)
+        paymentMethod:
+          nullable: true
+          description: Information about the non-cashback payment method that is being
+            used for this purchase. For orders made entirely by cashback, this
+            can be null.
+          allOf:
+            - $ref: "#/components/schemas/PaymentMethod"
+        items:
+          description: Information about the items being purchased by the user. Used for
+            eligibility calculation.
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemInfo"
+      required:
+        - claimId
+        - commit
+        - accountId
+        - cashbackOffset
+        - items
+    RedemptionResponseData:
+      type: object
+      properties:
+        campaignName:
+          type: string
+          example: Get $5 Off Your First PayLater Purchase
+        discountedItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiscountedItem"
+      required:
+        - campaignName
+        - discountedItems
+    RedemptionResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/RedemptionResponseData"
+      required:
+        - data
+    RedemptionStatusUpdateRequest:
+      type: object
+      properties:
+        identifierType:
+          type: string
+          enum:
+            - clientReference
+          description: Type of identifier that is being used to perform the status update.
+            For now, only clientReference will be supported.
+        clientReference:
+          type: string
+          description: Reference for this redemption that was set during the previous call
+            to POST /promo/redemptions
+          example: R7GTE6-WR6G-U
+        status:
+          type: string
+          description: New status for this redemption
+          enum:
+            - available
+            - redeemed
+            - refunded
+      required:
+        - identifierType
+        - clientReference
+        - status
+    RecalculateDiscountRequest:
+      type: object
+      properties:
+        identifierType:
+          type: string
+          enum:
+            - clientReference
+          description: Type of identifier that is being used to perform the status update.
+            For now, only clientReference will be supported.
+        clientReference:
+          type: string
+          description: Reference for this redemption that was set during the previous call
+            to POST /promo/redemptions
+          example: R7GTE6-WR6G-U
+        items:
+          description: Information about the remaining items in the order after partial
+            refund was performed.
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemInfo"
+        cashbackOffset:
+          type: integer
+          minimum: 0
+          description: The amount of cashback that is used for this purchase in minor
+            units (i.e. $1 should be sent as 100)
+      required:
+        - identifierType
+        - clientReference
+        - items
+        - cashbackOffset
+    RecalculateDiscountData:
+      type: object
+      properties:
+        discountedItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiscountedItem"
+      required:
+        - discountedItems
+    RecalculateDiscountResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/RecalculateDiscountData"
+      required:
+        - data
